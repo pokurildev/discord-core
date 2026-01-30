@@ -36,7 +36,7 @@ class Welcome(commands.Cog):
         background.text((550, 430), f"You are member #{member_count}", color="#ff00ff", font=font_small, align="center")
 
         file_out = io.BytesIO()
-        background.save(file_out, format="PNG")
+        background.save(file_out, "PNG")
         file_out.seek(0)
         
         return discord.File(file_out, filename="welcome.png")

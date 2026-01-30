@@ -109,7 +109,7 @@ class Leveling(commands.Cog):
         background.text((550, 185), f"{current_xp} / {next_level_xp} XP", color="#ffffff", font=Font.poppins(size=25), align="center")
 
         file_out = io.BytesIO()
-        background.save(file_out, format="PNG")
+        background.save(file_out, "PNG")
         file_out.seek(0)
         
         file = discord.File(file_out, filename="rank.png")
