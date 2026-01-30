@@ -4,6 +4,8 @@ from easy_pil import Editor, load_image, Font, Canvas
 import io
 import os
 import config
+import datetime
+from config import UIConfig
 
 class Welcome(commands.Cog):
     def __init__(self, bot):
@@ -30,10 +32,14 @@ class Welcome(commands.Cog):
         font_big = Font.poppins(size=60, variant="bold")
         font_small = Font.poppins(size=40, variant="regular")
 
-        background.text((550, 360), f"Welcome, {member.name}!", color="#00ffff", font=font_big, align="center")
+        # Используем неоновые цвета из дизайн-системы
+        accent_color = "#00ffff"
+        magenta_color = "#ff00ff"
+
+        background.text((550, 360), f"Welcome, {member.name}!", color=accent_color, font=font_big, align="center")
         
         member_count = len(member.guild.members)
-        background.text((550, 430), f"You are member #{member_count}", color="#ff00ff", font=font_small, align="center")
+        background.text((550, 430), f"You are member #{member_count}", color=magenta_color, font=font_small, align="center")
 
         file_out = io.BytesIO()
         background.save(file_out, "PNG")
@@ -43,6 +49,7 @@ class Welcome(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
+        # Новый стиль — приветственное сообщение
         channel = self.bot.get_channel(config.WELCOME_CHANNEL_ID)
         if not channel:
             print(f" [!] Канал для приветствий (ID: {config.WELCOME_CHANNEL_ID}) не найден.")
@@ -50,7 +57,23 @@ class Welcome(commands.Cog):
 
         try:
             file = await self.generate_welcome_card(member)
-            await channel.send(f"Добро пожаловать на сервер, {member.mention}!", file=file)
+            
+            embed = discord.Embed(
+                title="Добро пожаловать на борт!",
+                description=(
+                    f"Приветствуем тебя, {member.mention}, в нашем сообществе!\n\n"
+                    f"**✨ Твой статус:** `Участник`\n"
+                    f"** Твой ID:** `{member.id}`\n\n"
+                    f"*Обязательно прочитай правила и наслаждайся общением!*"
+                ),
+                color=UIConfig.CYAN,
+                timestamp=datetime.datetime.now(datetime.timezone.utc)
+            )
+            embed.set_author(name=member.guild.name, icon_url=UIConfig.ICON_WELCOME)
+            embed.set_image(url="attachment://welcome.png")
+            embed.set_footer(text=f"Вы стали {len(member.guild.members)} участником • {UIConfig.FOOTER}")
+            
+            await channel.send(f"Hey {member.mention}, welcome!", embed=embed, file=file)
         except Exception as e:
             print(f" [!] Ошибка при отправке приветствия: {e}")
 

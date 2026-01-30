@@ -1,12 +1,11 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from easy_pil import Editor, load_image, Font, Canvas
-import io
-import os
 import random
 import time
+import datetime
 import config
+from config import UIConfig
 from database.db import get_db
 
 class Leveling(commands.Cog):
@@ -67,53 +66,22 @@ class Leveling(commands.Cog):
         new_level, _ = self.calculate_level(new_total_xp)
 
         if new_level > old_level:
-            await message.channel.send(f"🎉 Поздравляем, {message.author.mention}! Вы достигли **уровня {new_level}**!")
-
-    @app_commands.command(name="rank", description="Посмотреть свой текущий уровень и ранг")
-    async def rank(self, interaction: discord.Interaction, member: discord.Member = None):
-        member = member or interaction.user
-        
-        async with get_db() as db:
-            async with db.execute("SELECT xp FROM users WHERE user_id = ?", (member.id,)) as cursor:
-                row = await cursor.fetchone()
-                user_xp = row[0] if row else 0
+            # Новый стиль — уведомление о новом уровне
+            level_embed = discord.Embed(
+                title="Новый Уровень Достигнут!",
+                description=(
+                    f"Поздравляем, {message.author.mention}!\n\n"
+                    f"Вы перешли на новый этап развития.\n"
+                    f"Теперь ваш уровень: ```ansi\n\u001b[0;36m{new_level}\u001b[0m\n```"
+                ),
+                color=UIConfig.CYAN,
+                timestamp=datetime.datetime.now(datetime.timezone.utc)
+            )
+            level_embed.set_author(name="Система Прогресса", icon_url=UIConfig.ICON_TROPHY)
+            level_embed.set_thumbnail(url=message.author.display_avatar.url)
+            level_embed.set_footer(text=UIConfig.FOOTER)
             
-            async with db.execute("SELECT COUNT(*) FROM users WHERE xp > ?", (user_xp,)) as cursor:
-                rank_row = await cursor.fetchone()
-                leaderboard_rank = (rank_row[0] + 1) if row else "N/A"
-
-        level, current_xp = self.calculate_level(user_xp)
-        next_level_xp = self.get_xp_for_level(level)
-        percentage = min(100, max(5, int((current_xp / next_level_xp) * 100)))
-
-        background = Editor(Canvas((900, 250), color="#1e1e2e"))
-        if os.path.exists(config.WELCOME_BG_PATH):
-            bg_image = Editor(config.WELCOME_BG_PATH).resize((900, 250), crop=True)
-            background.paste(bg_image, (0, 0))
-
-        avatar_image = load_image(str(member.display_avatar.url))
-        profile = Editor(avatar_image).resize((180, 180)).circle_image()
-        background.paste(profile, (35, 35))
-
-        font_main = Font.poppins(size=40, variant="bold")
-        font_sub = Font.poppins(size=30, variant="regular")
-
-        background.text((250, 50), str(member), color="#00ffff", font=font_main)
-        background.text((850, 50), f"RANK #{leaderboard_rank}", color="#ff00ff", font=font_sub, align="right")
-        background.text((850, 110), f"LEVEL {level}", color="#00ffff", font=font_sub, align="right")
-
-        background.rectangle((250, 180), width=600, height=40, fill="#444455", radius=20)
-        bar_width = int(600 * (percentage / 100))
-        background.rectangle((250, 180), width=bar_width, height=40, fill="#00ffff", radius=20)
-        
-        background.text((550, 185), f"{current_xp} / {next_level_xp} XP", color="#ffffff", font=Font.poppins(size=25), align="center")
-
-        file_out = io.BytesIO()
-        background.save(file_out, "PNG")
-        file_out.seek(0)
-        
-        file = discord.File(file_out, filename="rank.png")
-        await interaction.response.send_message(file=file)
+            await message.channel.send(embed=level_embed)
 
 async def setup(bot):
     await bot.add_cog(Leveling(bot))
