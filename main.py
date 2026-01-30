@@ -27,6 +27,11 @@ class MyBot(commands.Bot):
                 except Exception as e:
                     print(f" [!] Ошибка при загрузке {filename}: {e}")
         
+        # Регистрация персистентных View (для тикетов)
+        from cogs.tickets import PersistentTicketView, TicketControlView
+        self.add_view(PersistentTicketView())
+        self.add_view(TicketControlView())
+        
         # Синхронизация слэш-команд
         print("--- Синхронизация команд ---")
         try:
