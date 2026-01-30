@@ -1,11 +1,11 @@
 import aiosqlite
 import config
 
-async def get_db():
-    return await aiosqlite.connect(config.DB_PATH)
+def get_db():
+    return aiosqlite.connect(config.DB_PATH)
 
 async def create_tables():
-    async with await get_db() as db:
+    async with get_db() as db:
         await db.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY,

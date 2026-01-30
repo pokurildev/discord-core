@@ -26,7 +26,7 @@ class Leveling(commands.Cog):
         return lvl, total_xp
 
     async def update_user_xp(self, user_id, xp_to_add):
-        async with await get_db() as db:
+        async with get_db() as db:
             async with db.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,)) as cursor:
                 row = await cursor.fetchone()
                 
@@ -55,7 +55,7 @@ class Leveling(commands.Cog):
         xp_gain = random.randint(10, 20)
         old_xp_row = 0
         
-        async with await get_db() as db:
+        async with get_db() as db:
             async with db.execute("SELECT xp FROM users WHERE user_id = ?", (user_id,)) as cursor:
                 row = await cursor.fetchone()
                 if row: old_xp_row = row[0]
