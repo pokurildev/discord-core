@@ -1,0 +1,17 @@
+# Окружение
+.env
+.venv/
+env/
+venv/
+
+# Python файлы
+__pycache__/
+*.py[cod]
+*$py.class
+
+# База данных (если используешь SQLite)
+*.sqlite3
+database/*.sqlite3
+
+# Логи
+*.log
