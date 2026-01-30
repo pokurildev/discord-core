@@ -73,7 +73,7 @@ class Leveling(commands.Cog):
     async def rank(self, interaction: discord.Interaction, member: discord.Member = None):
         member = member or interaction.user
         
-        async with await get_db() as db:
+        async with get_db() as db:
             async with db.execute("SELECT xp FROM users WHERE user_id = ?", (member.id,)) as cursor:
                 row = await cursor.fetchone()
                 user_xp = row[0] if row else 0
