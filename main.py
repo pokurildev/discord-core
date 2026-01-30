@@ -1,17 +1,13 @@
 import discord
 from discord.ext import commands
 import os
-from dotenv import load_dotenv
+import config
 from database.db import create_tables
-
-# Загрузка переменных окружения
-load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
 
 class MyBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.all()
-        super().__init__(command_prefix="!", intents=intents)
+        super().__init__(command_prefix=config.PREFIX, intents=intents)
 
     async def setup_hook(self):
         # Создание таблиц в БД при запуске
@@ -47,7 +43,7 @@ class MyBot(commands.Bot):
 
 if __name__ == "__main__":
     bot = MyBot()
-    if TOKEN:
-        bot.run(TOKEN)
+    if config.TOKEN:
+        bot.run(config.TOKEN)
     else:
-        print(" [!] Ошибка: DISCORD_TOKEN не найден в .env")
+        print(" [!] Ошибка: DISCORD_TOKEN не найден в .env или config.py")

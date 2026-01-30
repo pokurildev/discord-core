@@ -1,10 +1,8 @@
 import aiosqlite
-import os
-
-DB_PATH = os.path.join("database", "bot_database.db")
+import config
 
 async def get_db():
-    return await aiosqlite.connect(DB_PATH)
+    return await aiosqlite.connect(config.DB_PATH)
 
 async def create_tables():
     async with await get_db() as db:

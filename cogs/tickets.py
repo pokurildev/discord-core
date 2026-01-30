@@ -3,9 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 import datetime
 import io
-
-# Конфигурация (замените на свои ID)
-LOG_CHANNEL_ID = 123456789012345678 
+import config
 
 class TicketModal(discord.ui.Modal, title="Создание тикета"):
     reason = discord.ui.TextInput(
@@ -20,10 +18,10 @@ class TicketModal(discord.ui.Modal, title="Создание тикета"):
         guild = interaction.guild
         user = interaction.user
         
-        # Поиск или создание категории
-        category = discord.utils.get(guild.categories, name="Tickets")
+        # Поиск или создание категории из конфига
+        category = discord.utils.get(guild.categories, name=config.TICKET_CATEGORY_NAME)
         if not category:
-            category = await guild.create_category("Tickets")
+            category = await guild.create_category(config.TICKET_CATEGORY_NAME)
 
         # Настройка прав (приватность)
         overwrites = {
@@ -32,8 +30,8 @@ class TicketModal(discord.ui.Modal, title="Создание тикета"):
             guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True, manage_channels=True)
         }
         
-        # Добавляем доступ для админов (если есть роль Admin)
-        admin_role = discord.utils.get(guild.roles, name="Admin")
+        # Добавляем доступ для админов из конфига
+        admin_role = discord.utils.get(guild.roles, name=config.ADMIN_ROLE_NAME)
         if admin_role:
             overwrites[admin_role] = discord.PermissionOverwrite(read_messages=True, send_messages=True)
 
@@ -82,8 +80,8 @@ class TicketControlView(discord.ui.View):
         file_data = io.BytesIO(transcript.encode("utf-8"))
         file = discord.File(file_data, filename=f"{channel.name}-logs.txt")
         
-        # Отправка в лог-канал
-        log_channel = interaction.guild.get_channel(LOG_CHANNEL_ID)
+        # Отправка в лог-канал из конфига
+        log_channel = interaction.guild.get_channel(config.LOG_CHANNEL_ID)
         if log_channel:
             await log_channel.send(f"🔒 Тикет `{channel.name}` закрыт пользователем {interaction.user}.", file=file)
 
